@@ -1,0 +1,26 @@
+@startuml sd-07-danh-gia
+!include ../_style.puml
+title Biểu đồ tuần tự – Đánh giá sản phẩm
+autonumber
+actor "Khách hàng" as U
+participant "Giao diện web" as FE
+participant "Backend" as BE
+database "CSDL" as DB
+
+U -> FE : Chọn sản phẩm trong đơn đã nhận, chấm sao, viết nhận xét
+FE -> BE : Gửi (order_item_id, rating, comment) + phiên
+BE -> DB : Tìm order_items + orders\ntheo order_item_id, user_id = người trong phiên,\nstatus IN (DELIVERED, COMPLETED)
+DB --> BE : Kết quả
+alt Không có dòng hàng hợp lệ
+  BE --> FE : "Bạn chưa mua hoặc chưa nhận sản phẩm này"
+else Hợp lệ
+  BE -> DB : Tìm reviews theo order_item_id
+  alt Đã có đánh giá
+    BE --> FE : "Bạn đã đánh giá sản phẩm này"
+  else Chưa có
+    BE -> DB : Thêm reviews (UNIQUE order_item_id chặn trùng lần cuối)
+    BE --> FE : Đánh giá thành công
+    FE --> U : Hiển thị đánh giá
+  end
+end
+@enduml

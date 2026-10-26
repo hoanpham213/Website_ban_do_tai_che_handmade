@@ -1,0 +1,28 @@
+@startuml sd-01-dang-ky
+!include ../_style.puml
+title Biểu đồ tuần tự – Đăng ký tài khoản
+autonumber
+actor "Khách vãng lai" as U
+participant "Giao diện web" as FE
+participant "Backend" as BE
+database "CSDL" as DB
+
+U -> FE : Nhập email, mật khẩu, họ tên
+FE -> FE : Kiểm tra định dạng dữ liệu
+FE -> BE : Gửi yêu cầu đăng ký
+BE -> DB : Tìm users theo email
+DB --> BE : Kết quả
+alt Email đã tồn tại
+  BE --> FE : Lỗi "Email đã được sử dụng"
+  FE --> U : Hiển thị lỗi
+else Email chưa tồn tại
+  BE -> BE : Băm mật khẩu (bcrypt/argon2)
+  BE -> DB : BEGIN
+  BE -> DB : Lấy roles có code = CUSTOMER
+  BE -> DB : Thêm users (password_hash, role_id)
+  BE -> DB : Thêm carts (user_id)
+  BE -> DB : COMMIT
+  BE --> FE : Đăng ký thành công
+  FE --> U : Chuyển sang trang đăng nhập
+end
+@enduml

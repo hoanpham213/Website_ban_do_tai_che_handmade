@@ -1,0 +1,29 @@
+' Kiểu chung cho mọi biểu đồ GOM
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 13
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam backgroundColor white
+skinparam ArrowColor #444444
+skinparam ActorBorderColor #2F5D50
+skinparam ActorBackgroundColor #E8F3EE
+skinparam UsecaseBorderColor #2F5D50
+skinparam UsecaseBackgroundColor #F4FAF7
+skinparam RectangleBorderColor #2F5D50
+skinparam PackageBorderColor #7A8F87
+skinparam NoteBackgroundColor #FFF8E1
+skinparam NoteBorderColor #C9A227
+skinparam SequenceLifeLineBorderColor #7A8F87
+skinparam SequenceGroupBorderColor #7A8F87
+skinparam ParticipantBorderColor #2F5D50
+skinparam ParticipantBackgroundColor #F4FAF7
+skinparam DatabaseBorderColor #2F5D50
+skinparam DatabaseBackgroundColor #F4FAF7
+skinparam ActivityBorderColor #2F5D50
+skinparam ActivityBackgroundColor #F4FAF7
+skinparam ActivityDiamondBorderColor #2F5D50
+skinparam ActivityDiamondBackgroundColor #FFFFFF
+skinparam SwimlaneBorderColor #7A8F87
+skinparam ClassBorderColor #2F5D50
+skinparam ClassBackgroundColor #FFFFFF
+skinparam ClassHeaderBackgroundColor #E8F3EE

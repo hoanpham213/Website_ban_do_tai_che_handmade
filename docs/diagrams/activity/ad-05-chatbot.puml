@@ -1,0 +1,39 @@
+@startuml ad-05-chatbot
+!include ../_style.puml
+title Biểu đồ hoạt động – Chatbot AI trả lời câu hỏi
+
+|Người dùng|
+start
+:Gửi câu hỏi;
+
+|Hệ thống|
+:Gửi hướng dẫn hệ thống, lịch sử,\ncâu hỏi và danh sách hàm cho LLM;
+
+|Dịch vụ LLM|
+repeat
+  if (Cần dữ liệu của cửa hàng?) then (có)
+    :Yêu cầu gọi hàm\n(tìm sản phẩm, chi tiết, FAQ, đơn của tôi);
+    |Hệ thống|
+    if (Hàm về đơn hàng và chưa đăng nhập?) then (có)
+      :Trả kết quả "cần đăng nhập";
+    else (không)
+      :Truy vấn CSDL (chỉ đọc;\nđơn hàng lọc theo user trong phiên);
+      :Trả kết quả hàm;
+    endif
+    |Dịch vụ LLM|
+  else (không)
+  endif
+repeat while (Còn cần gọi hàm?) is (có) not (không)
+:Sinh câu trả lời từ dữ liệu nhận được;
+
+|Hệ thống|
+if (LLM trả lời thành công?) then (có)
+  :Lưu lịch sử chat (tùy chọn);
+else (không)
+  :Dùng câu trả lời dự phòng\nvà gợi ý tìm kiếm;
+endif
+
+|Người dùng|
+:Xem câu trả lời;
+stop
+@enduml

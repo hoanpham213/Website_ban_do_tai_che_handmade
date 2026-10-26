@@ -1,0 +1,107 @@
+@startuml erd-nhom-san-pham
+!include ../_style.puml
+title ERD nhóm sản phẩm – thuộc tính động, vật liệu, tồn kho
+hide circle
+hide empty members
+skinparam linetype ortho
+' Sinh từ _entities.puml và _relations.puml; sửa ở hai file đó rồi chạy lại
+entity "categories" as categories {
+  * id : BIGINT <<PK>>
+  --
+  * name : VARCHAR(100) <<UQ>>
+  * slug : VARCHAR(120) <<UQ>>
+  description : TEXT
+  * is_active : BOOLEAN
+  * sort_order : INT
+  + timestamps
+}
+entity "category_attributes" as category_attributes {
+  * category_id : BIGINT <<PK, FK>>
+  * attribute_id : BIGINT <<PK, FK>>
+  --
+  * is_required : BOOLEAN
+  * is_filterable : BOOLEAN
+  * sort_order : INT
+}
+entity "attributes" as attributes {
+  * id : BIGINT <<PK>>
+  --
+  * code : VARCHAR(50) <<UQ>>
+  * name : VARCHAR(100)
+  * data_type : VARCHAR(10)
+  unit : VARCHAR(20)
+  * is_multi_value : BOOLEAN
+  + timestamps
+}
+entity "attribute_options" as attribute_options {
+  * id : BIGINT <<PK>>
+  --
+  * attribute_id : BIGINT <<FK>>
+  * value : VARCHAR(100)
+  * sort_order : INT
+  UQ (attribute_id, value)
+}
+entity "products" as products {
+  * id : BIGINT <<PK>>
+  --
+  * category_id : BIGINT <<FK>>
+  * name : VARCHAR(200)
+  * slug : VARCHAR(220) <<UQ>>
+  description : TEXT
+  origin_story : TEXT
+  * price : DECIMAL(12,0)
+  * sale_type : VARCHAR(10)
+  * status : VARCHAR(10)
+  + timestamps
+}
+entity "product_attribute_values" as pav {
+  * id : BIGINT <<PK>>
+  --
+  * product_id : BIGINT <<FK>>
+  * attribute_id : BIGINT <<FK>>
+  option_id : BIGINT <<FK>>
+  value_number : DECIMAL(10,2)
+  value_text : VARCHAR(255)
+  UQ (product_id, attribute_id, option_id)
+}
+entity "product_images" as product_images {
+  * id : BIGINT <<PK>>
+  --
+  * product_id : BIGINT <<FK>>
+  * image_url : VARCHAR(500)
+  alt_text : VARCHAR(255)
+  * sort_order : INT
+  * is_primary : BOOLEAN
+}
+entity "materials" as materials {
+  * id : BIGINT <<PK>>
+  --
+  * name : VARCHAR(100) <<UQ>>
+  description : TEXT
+  + timestamps
+}
+entity "product_materials" as product_materials {
+  * product_id : BIGINT <<PK, FK>>
+  * material_id : BIGINT <<PK, FK>>
+  --
+  * weight_grams : INT
+}
+entity "inventories" as inventories {
+  * product_id : BIGINT <<PK, FK>>
+  --
+  * on_hand : INT
+  * reserved : INT
+  * updated_at : DATETIME
+}
+categories ||--o{ products
+categories ||--o{ category_attributes
+attributes ||--o{ category_attributes
+attributes ||--o{ attribute_options
+products ||--o{ pav
+attributes ||--o{ pav
+attribute_options |o--o{ pav
+products ||--o{ product_images
+products ||--o{ product_materials
+materials ||--o{ product_materials
+products ||--|| inventories
+@enduml

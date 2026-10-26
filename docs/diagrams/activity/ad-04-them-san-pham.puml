@@ -1,0 +1,54 @@
+@startuml ad-04-them-san-pham
+!include ../_style.puml
+title Biểu đồ hoạt động – Thêm sản phẩm và đăng bán
+
+|Quản trị viên|
+start
+:Chọn danh mục;
+
+|Hệ thống|
+:Tải bộ thuộc tính của danh mục\n(category_attributes);
+
+|Quản trị viên|
+:Nhập tên, mô tả, giá;
+:Chọn hình thức bán (STOCK / UNIQUE);
+:Nhập giá trị các thuộc tính;
+:Khai báo vật liệu tái sử dụng và khối lượng (g);
+:Viết câu chuyện nguồn gốc;
+:Tải ảnh, chọn ảnh đại diện;
+:Lưu nháp;
+
+|Hệ thống|
+if (Dữ liệu hợp lệ?) then (không)
+  :Báo lỗi từng trường;
+  |Quản trị viên|
+  :Sửa thông tin;
+  stop
+else (có)
+endif
+
+|Hệ thống|
+:Tạo sản phẩm DRAFT và dòng tồn kho = 0\n(cùng một transaction);
+
+|Quản trị viên|
+:Nhập kho;
+
+|Hệ thống|
+if (UNIQUE và số lượng > 1?) then (có)
+  :Từ chối: sản phẩm độc bản tối đa 1;
+  stop
+else (không)
+endif
+:on_hand += q, ghi IMPORT;
+
+|Quản trị viên|
+:Bấm "Đăng bán";
+
+|Hệ thống|
+if (Đủ thuộc tính bắt buộc, có ảnh, có tồn?) then (có)
+  :Sản phẩm → ACTIVE, hiện trên cửa hàng;
+else (không)
+  :Báo thiếu thông tin, giữ DRAFT;
+endif
+stop
+@enduml

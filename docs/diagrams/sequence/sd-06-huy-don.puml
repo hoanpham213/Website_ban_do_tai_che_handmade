@@ -1,0 +1,37 @@
+@startuml sd-06-huy-don
+!include ../_style.puml
+title Biểu đồ tuần tự – Khách hàng hủy đơn
+autonumber
+actor "Khách hàng" as U
+participant "Giao diện web" as FE
+participant "Backend" as BE
+database "CSDL" as DB
+
+U -> FE : Chọn "Hủy đơn", nhập lý do
+FE -> BE : Gửi yêu cầu hủy (order_code, lý do) + phiên
+BE -> DB : BEGIN
+BE -> DB : Khóa dòng orders theo order_code\nVÀ user_id = người trong phiên
+DB --> BE : order hoặc rỗng
+alt Không tìm thấy
+  BE -> DB : ROLLBACK
+  BE --> FE : "Không tìm thấy đơn hàng"
+else Trạng thái không cho khách hủy
+  BE -> DB : ROLLBACK
+  BE --> FE : "Đơn đã được xử lý, không thể hủy"
+else Được hủy
+  BE -> DB : orders: CANCELLED, cancel_reason
+  BE -> DB : Thêm order_status_histories
+  BE -> DB : Đọc order_items
+  loop Từng dòng hàng
+    BE -> DB : inventories: reserved −= q
+    BE -> DB : Thêm inventory_transactions (RELEASE)
+  end
+  BE -> DB : Đọc payments
+  opt payments.status = PAID
+    BE -> BE : Đưa đơn vào danh sách cần hoàn tiền
+  end
+  BE -> DB : COMMIT
+  BE --> FE : Hủy thành công
+  FE --> U : Cập nhật trạng thái đơn
+end
+@enduml

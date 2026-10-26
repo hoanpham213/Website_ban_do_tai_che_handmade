@@ -1,0 +1,35 @@
+@startuml ad-03-huy-don
+!include ../_style.puml
+title Biểu đồ hoạt động – Hủy đơn hàng
+
+|Người yêu cầu (khách hàng / quản trị viên)|
+start
+:Chọn hủy đơn, nhập lý do;
+
+|Hệ thống|
+:Mở transaction, khóa dòng đơn;
+if (Đơn thuộc người yêu cầu\n(hoặc người yêu cầu là quản trị viên)?) then (không)
+  :Báo "không tìm thấy đơn hàng";
+  stop
+else (có)
+endif
+if (Trạng thái hiện tại cho phép hủy?) then (không)
+  :Báo "đơn đã được xử lý, không thể hủy";
+  stop
+else (có)
+endif
+:Đơn → CANCELLED, ghi lịch sử trạng thái;
+:Với từng dòng hàng: reserved −= q, ghi RELEASE;
+:Commit;
+if (Thanh toán đã PAID?) then (có)
+  :Đưa đơn vào danh sách cần hoàn tiền;
+  |Quản trị viên|
+  :Hoàn tiền thủ công cho khách;
+  :Xác nhận đã hoàn tiền;
+  |Hệ thống|
+  :Payment → REFUNDED, ghi refunded_at;
+else (không)
+endif
+:Thông báo hủy thành công;
+stop
+@enduml

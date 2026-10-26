@@ -1,0 +1,48 @@
+# Thư viện cài đặt
+node_modules/
+vendor/
+.venv/
+venv/
+__pycache__/
+
+# Bản build
+dist/
+build/
+out/
+.next/
+target/
+coverage/
+
+# Biến môi trường và bí mật (KHÔNG commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Log và file tạm
+*.log
+npm-debug.log*
+yarn-debug.log*
+.DS_Store
+Thumbs.db
+~$*.docx
+~$*.pptx
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Công cụ render biểu đồ (tải riêng, không commit)
+plantuml.jar
+
+# Supabase CLI
+supabase/.temp/
+supabase/.branches/
+supabase/functions/.env
+
+# Biến môi trường (chứa cấu hình bí mật)
+.env
+.env.*
+!.env.example

@@ -1,0 +1,9 @@
+@startuml erd-tong-quan
+!include ../_style.puml
+title ERD tổng quan – CSDL GOM (chỉ tên bảng)
+hide circle
+hide members
+skinparam linetype ortho
+!include _entities.puml
+!include _relations.puml
+@enduml

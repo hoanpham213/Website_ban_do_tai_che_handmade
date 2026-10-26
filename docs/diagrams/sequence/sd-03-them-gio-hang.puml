@@ -1,0 +1,32 @@
+@startuml sd-03-them-gio-hang
+!include ../_style.puml
+title Biểu đồ tuần tự – Thêm sản phẩm vào giỏ hàng
+autonumber
+actor "Khách hàng" as U
+participant "Giao diện web" as FE
+participant "Backend" as BE
+database "CSDL" as DB
+
+U -> FE : Bấm "Thêm vào giỏ" (sản phẩm, số lượng)
+FE -> BE : Gửi yêu cầu (product_id, quantity) + phiên
+BE -> DB : Lấy carts theo user_id trong phiên
+BE -> DB : Lấy products (status, sale_type) và inventories
+DB --> BE : Kết quả
+alt Sản phẩm không ACTIVE hoặc hết hàng (on_hand − reserved = 0)
+  BE --> FE : Lỗi "Sản phẩm không còn bán"
+else Còn bán
+  BE -> DB : Tìm cart_items (cart_id, product_id)
+  alt Đã có trong giỏ
+    BE -> DB : Tăng quantity
+  else Chưa có
+    BE -> DB : Thêm cart_items
+  end
+  note right of BE
+    Sản phẩm độc bản: quantity luôn = 1.
+    Giỏ hàng KHÔNG giữ hàng,
+    không ghi inventories.
+  end note
+  BE --> FE : Cập nhật giỏ thành công
+  FE --> U : Hiển thị số lượng trong giỏ
+end
+@enduml

@@ -1,0 +1,14 @@
+# Đoạn cấu hình cần THÊM vào supabase/config.toml (file này do `supabase init` tạo).
+# Mình không tạo sẵn config.toml vì nó phải sinh từ đúng phiên bản Supabase CLI của bạn.
+
+[functions.chatbot]
+entrypoint = "./functions/chatbot/index.js"
+verify_jwt = false   # khách chưa đăng nhập vẫn hỏi được; function tự đọc phiên nếu có
+
+[functions.payment-create]
+entrypoint = "./functions/payment-create/index.js"
+verify_jwt = true
+
+[functions.payment-callback]
+entrypoint = "./functions/payment-callback/index.js"
+verify_jwt = false   # cổng thanh toán không có JWT; function tự kiểm tra chữ ký

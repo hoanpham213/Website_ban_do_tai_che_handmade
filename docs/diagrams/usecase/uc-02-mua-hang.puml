@@ -1,0 +1,49 @@
+@startuml uc-02-mua-hang
+!include ../_style.puml
+title Use Case phân rã – Mua hàng
+left to right direction
+
+actor "Khách hàng" as Customer
+actor "Cổng thanh toán" as PayGW <<hệ thống ngoài>>
+
+rectangle "Mua hàng" {
+  usecase "Quản lý giỏ hàng" as Cart
+  usecase "Thêm sản phẩm vào giỏ" as CartAdd
+  usecase "Cập nhật số lượng" as CartQty
+  usecase "Xóa sản phẩm khỏi giỏ" as CartDel
+
+  usecase "Đặt hàng" as Order
+  usecase "Chọn địa chỉ giao hàng" as ChooseAddr
+  usecase "Chọn phương thức thanh toán" as ChoosePay
+  usecase "Thanh toán trực tuyến" as PayOnline
+
+  usecase "Theo dõi đơn hàng" as Track
+  usecase "Hủy đơn hàng" as Cancel
+  usecase "Đánh giá sản phẩm đã mua" as Review
+}
+
+Customer --> Cart
+Customer --> Order
+Customer --> Track
+Customer --> Review
+
+Cart <.. CartAdd : <<extend>>
+Cart <.. CartQty : <<extend>>
+Cart <.. CartDel : <<extend>>
+
+Order ..> ChooseAddr : <<include>>
+Order ..> ChoosePay : <<include>>
+Order <.. PayOnline : <<extend>>
+PayOnline --> PayGW
+
+Track <.. Cancel : <<extend>>
+
+note right of Cancel
+  Chỉ hủy được khi đơn
+  chưa chuyển sang SHIPPING
+end note
+note right of Review
+  Chỉ khi đơn ở trạng thái
+  DELIVERED hoặc COMPLETED
+end note
+@enduml

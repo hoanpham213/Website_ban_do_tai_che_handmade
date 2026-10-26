@@ -1,0 +1,69 @@
+@import "tailwindcss";
+/* Font Awesome Free (đã cài bằng npm). Dùng qua components/ui/Icon.js */
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+
+/* Design tokens: đổi màu toàn site chỉ cần sửa ở đây.
+   Tailwind v4 tự sinh class tương ứng, ví dụ bg-cream-50, text-brand-700, border-earth-300.
+
+   Bảng màu gốc (5 màu):
+     Deep Espresso Clay  #5B4C3A  -> brand-700 (nút chính, tiêu đề nổi bật)
+     Rich Earth Brown    #8A7356  -> brand-500 / earth-500
+     Soft Mushroom Beige #C4B39A  -> earth-300
+     Warm Putty          #DED1BA  -> cream-200 (đường viền)
+     Gentle Bone White   #F4EFE6  -> cream-50 (nền trang) */
+@theme {
+  /* Nền */
+  --color-cream-50: #f4efe6;
+  --color-cream-100: #ebe3d3;
+  --color-cream-200: #ded1ba;
+
+  /* Màu chủ đạo (nâu espresso) */
+  --color-brand-100: #ebe2d1;
+  --color-brand-500: #8a7356;
+  --color-brand-600: #75604a;
+  --color-brand-700: #5b4c3a;
+  --color-brand-800: #46392b;
+
+  /* Màu nhấn (nâu đất / be) */
+  --color-earth-300: #c4b39a;
+  --color-earth-500: #7f694c;
+  --color-earth-700: #6a553c;
+
+  /* Thang xám của Tailwind được thay bằng các sắc nâu ấm cùng tông,
+     để chữ, viền và nền phụ hài hòa với bảng màu. */
+  --color-stone-50: #f8f5ef;
+  --color-stone-100: #efe8db;
+  --color-stone-200: #e4dac7;
+  --color-stone-300: #d2c5ac;
+  --color-stone-400: #a8977c;
+  --color-stone-500: #7c6a52;
+  --color-stone-600: #655341;
+  --color-stone-700: #5b4c3a;
+  --color-stone-800: #45392c;
+  --color-stone-900: #33291f;
+  --color-stone-950: #231c15;
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Bề rộng trang: tràn 100% màn hình, chỉ chừa lề hai bên (đổi 1 chỗ này để chỉnh toàn site).
+   Chiều cao không bị giới hạn: trang dài theo nội dung. */
+@utility page-container {
+  width: 100%;
+  padding-inline: var(--page-gutter);
+}
+
+@layer base {
+  :root {
+    --page-gutter: 15px;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-cream-50 text-stone-800 antialiased;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-600;
+  }
+}

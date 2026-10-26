@@ -1,0 +1,156 @@
+@startuml erd-nhom-mua-hang
+!include ../_style.puml
+title ERD nhóm mua hàng – giỏ, đơn, thanh toán, kho, đánh giá
+hide circle
+hide empty members
+skinparam linetype ortho
+' Sinh từ _entities.puml và _relations.puml; sửa ở hai file đó rồi chạy lại
+entity "users" as users {
+  * id : BIGINT <<PK>>
+  --
+  * role_id : SMALLINT <<FK>>
+  * email : VARCHAR(255) <<UQ>>
+  * password_hash : VARCHAR(255)
+  * full_name : VARCHAR(100)
+  phone : VARCHAR(20)
+  * status : VARCHAR(10)
+  last_login_at : DATETIME
+  + timestamps
+}
+entity "addresses" as addresses {
+  * id : BIGINT <<PK>>
+  --
+  * user_id : BIGINT <<FK>>
+  * recipient_name : VARCHAR(100)
+  * recipient_phone : VARCHAR(20)
+  * province : VARCHAR(100)
+  * ward : VARCHAR(100)
+  * street_address : VARCHAR(255)
+  * is_default : BOOLEAN
+  + timestamps
+}
+entity "carts" as carts {
+  * id : BIGINT <<PK>>
+  --
+  * user_id : BIGINT <<FK, UQ>>
+  + timestamps
+}
+entity "cart_items" as cart_items {
+  * id : BIGINT <<PK>>
+  --
+  * cart_id : BIGINT <<FK>>
+  * product_id : BIGINT <<FK>>
+  * quantity : INT
+  * added_at : DATETIME
+  UQ (cart_id, product_id)
+}
+entity "products" as products {
+  * id : BIGINT <<PK>>
+  --
+  * category_id : BIGINT <<FK>>
+  * name : VARCHAR(200)
+  * slug : VARCHAR(220) <<UQ>>
+  description : TEXT
+  origin_story : TEXT
+  * price : DECIMAL(12,0)
+  * sale_type : VARCHAR(10)
+  * status : VARCHAR(10)
+  + timestamps
+}
+entity "inventories" as inventories {
+  * product_id : BIGINT <<PK, FK>>
+  --
+  * on_hand : INT
+  * reserved : INT
+  * updated_at : DATETIME
+}
+entity "inventory_transactions" as inventory_transactions {
+  * id : BIGINT <<PK>>
+  --
+  * product_id : BIGINT <<FK>>
+  * type : VARCHAR(10)
+  * quantity : INT
+  order_id : BIGINT <<FK>>
+  created_by : BIGINT <<FK>>
+  note : VARCHAR(255)
+  * created_at : DATETIME
+}
+entity "orders" as orders {
+  * id : BIGINT <<PK>>
+  --
+  * order_code : VARCHAR(20) <<UQ>>
+  * user_id : BIGINT <<FK>>
+  * status : VARCHAR(15)
+  * recipient_name : VARCHAR(100)
+  * recipient_phone : VARCHAR(20)
+  * ship_province : VARCHAR(100)
+  * ship_ward : VARCHAR(100)
+  * ship_street_address : VARCHAR(255)
+  customer_note : VARCHAR(500)
+  * subtotal : DECIMAL(12,0)
+  * shipping_fee : DECIMAL(12,0)
+  * total_amount : DECIMAL(12,0)
+  payment_deadline : DATETIME
+  cancel_reason : VARCHAR(255)
+  + timestamps
+}
+entity "order_items" as order_items {
+  * id : BIGINT <<PK>>
+  --
+  * order_id : BIGINT <<FK>>
+  * product_id : BIGINT <<FK>>
+  * product_name : VARCHAR(200)
+  * unit_price : DECIMAL(12,0)
+  * quantity : INT
+  * reused_weight_grams : INT
+  UQ (order_id, product_id)
+}
+entity "order_status_histories" as osh {
+  * id : BIGINT <<PK>>
+  --
+  * order_id : BIGINT <<FK>>
+  from_status : VARCHAR(15)
+  * to_status : VARCHAR(15)
+  changed_by : BIGINT <<FK>>
+  note : VARCHAR(255)
+  * created_at : DATETIME
+}
+entity "payments" as payments {
+  * id : BIGINT <<PK>>
+  --
+  * order_id : BIGINT <<FK, UQ>>
+  * method : VARCHAR(10)
+  provider : VARCHAR(30)
+  * amount : DECIMAL(12,0)
+  * status : VARCHAR(10)
+  transaction_ref : VARCHAR(100) <<UQ>>
+  paid_at : DATETIME
+  refunded_at : DATETIME
+  provider_response : TEXT
+  + timestamps
+}
+entity "reviews" as reviews {
+  * id : BIGINT <<PK>>
+  --
+  * order_item_id : BIGINT <<FK, UQ>>
+  * rating : TINYINT
+  comment : TEXT
+  * is_visible : BOOLEAN
+  + timestamps
+}
+users ||--o{ addresses
+users ||--|| carts
+carts ||--o{ cart_items
+products ||--o{ cart_items
+users ||--o{ orders
+orders ||--|{ order_items
+products ||--o{ order_items
+orders ||--|| payments
+orders ||--|{ osh
+users |o--o{ osh
+order_items ||--o| reviews
+products ||--|| inventories
+products ||--o{ inventory_transactions
+orders |o--o{ inventory_transactions
+users |o--o{ inventory_transactions
+@enduml

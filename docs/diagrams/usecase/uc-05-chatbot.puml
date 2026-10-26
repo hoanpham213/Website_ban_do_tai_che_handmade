@@ -1,0 +1,29 @@
+@startuml uc-05-chatbot
+!include ../_style.puml
+title Use Case phân rã – Chatbot AI tư vấn
+left to right direction
+
+actor "Khách vãng lai" as Guest
+actor "Khách hàng" as Customer
+actor "Dịch vụ LLM" as LLM <<hệ thống ngoài>>
+Customer -|> Guest
+
+rectangle "Chatbot" {
+  usecase "Hỏi đáp với chatbot" as Chat
+  usecase "Tư vấn, gợi ý sản phẩm\n(giá, vật liệu, phong cách, tồn kho)" as Advise
+  usecase "Hỏi FAQ, chính sách" as Faq
+  usecase "Tra cứu đơn hàng của tôi" as MyOrder
+}
+
+Guest --> Chat
+Customer --> MyOrder
+Chat <.. Advise : <<extend>>
+Chat <.. Faq : <<extend>>
+Chat <.. MyOrder : <<extend>>
+Chat --> LLM
+
+note bottom of MyOrder
+  Chỉ trả về đơn của người
+  đang đăng nhập
+end note
+@enduml

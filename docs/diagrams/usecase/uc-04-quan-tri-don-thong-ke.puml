@@ -1,0 +1,46 @@
+@startuml uc-04-quan-tri-don-thong-ke
+!include ../_style.puml
+title Use Case phân rã – Quản trị đơn hàng, người dùng, nội dung và thống kê
+left to right direction
+
+actor "Quản trị viên" as Admin
+
+rectangle "Vận hành" {
+  usecase "Quản lý đơn hàng" as Ord
+  usecase "Xem, lọc đơn hàng" as OrdList
+  usecase "Cập nhật trạng thái đơn" as OrdStatus
+  usecase "Hủy đơn hàng" as OrdCancel
+  usecase "Xác nhận đã hoàn tiền" as OrdRefund
+
+  usecase "Quản lý người dùng" as Usr
+  usecase "Khóa, mở khóa tài khoản" as UsrLock
+
+  usecase "Quản lý FAQ và chính sách" as Kb
+
+  usecase "Xem thống kê" as Stats
+  usecase "Doanh thu theo thời gian" as StatRev
+  usecase "Sản phẩm bán chạy" as StatTop
+  usecase "Đơn hàng theo trạng thái" as StatOrd
+  usecase "Khối lượng vật liệu\ntái sử dụng" as StatMat
+}
+
+Admin --> Ord
+Admin --> Usr
+Admin --> Kb
+Admin --> Stats
+
+Ord <.. OrdList : <<extend>>
+Ord <.. OrdStatus : <<extend>>
+Ord <.. OrdCancel : <<extend>>
+Ord <.. OrdRefund : <<extend>>
+Usr <.. UsrLock : <<extend>>
+Stats <.. StatRev : <<extend>>
+Stats <.. StatTop : <<extend>>
+Stats <.. StatOrd : <<extend>>
+Stats <.. StatMat : <<extend>>
+
+note bottom of OrdRefund
+  Áp dụng cho đơn CANCELLED
+  đã thanh toán trực tuyến
+end note
+@enduml

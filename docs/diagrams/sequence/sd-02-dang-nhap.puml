@@ -1,0 +1,25 @@
+@startuml sd-02-dang-nhap
+!include ../_style.puml
+title Biểu đồ tuần tự – Đăng nhập
+autonumber
+actor "Người dùng" as U
+participant "Giao diện web" as FE
+participant "Backend" as BE
+database "CSDL" as DB
+
+U -> FE : Nhập email, mật khẩu
+FE -> BE : Gửi yêu cầu đăng nhập
+BE -> DB : Tìm users theo email (kèm role)
+DB --> BE : Kết quả
+alt Không có tài khoản hoặc mật khẩu không khớp hash
+  BE --> FE : Lỗi chung "Email hoặc mật khẩu không đúng"
+else Tài khoản bị khóa (status = LOCKED)
+  BE --> FE : Lỗi "Tài khoản đã bị khóa"
+else Hợp lệ
+  BE -> DB : Cập nhật users.last_login_at
+  BE -> BE : Tạo phiên/token chứa user_id và vai trò
+  BE --> FE : Đăng nhập thành công + phiên
+  FE -> FE : Lưu phiên
+  FE --> U : Vào trang khách hàng hoặc trang quản trị theo vai trò
+end
+@enduml

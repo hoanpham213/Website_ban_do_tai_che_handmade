@@ -1,0 +1,56 @@
+@startuml ad-02-xu-ly-don-hang
+!include ../_style.puml
+title Biểu đồ hoạt động – Xử lý đơn hàng (vòng đời đơn)
+
+|Hệ thống|
+start
+:Đơn mới ở trạng thái PENDING;
+if (Đơn thanh toán ONLINE?) then (có)
+  if (Đã PAID trước hạn?) then (không)
+    :Hủy đơn tự động (CANCELLED);
+    :Trả hàng giữ về kho (RELEASE);
+    stop
+  else (có)
+  endif
+else (không, COD)
+endif
+
+|Quản trị viên|
+:Xem đơn, kiểm tra thông tin;
+if (Nhận đơn?) then (không)
+  :Hủy đơn, nhập lý do;
+  |Hệ thống|
+  :CANCELLED, RELEASE tồn kho;
+  if (Đã thanh toán?) then (có)
+    :Đưa vào danh sách cần hoàn tiền;
+  else (không)
+  endif
+  stop
+else (có)
+endif
+
+|Quản trị viên|
+:Xác nhận đơn (CONFIRMED);
+:Đóng gói (PROCESSING);
+:Giao cho đơn vị vận chuyển;
+
+|Hệ thống|
+:SHIPPING: on_hand −= q, reserved −= q (SHIP);
+
+|Quản trị viên|
+:Cập nhật đã giao (DELIVERED);
+
+|Hệ thống|
+if (Thanh toán COD?) then (có)
+  :Payment → PAID;
+else (không)
+endif
+:Cho phép khách đánh giá;
+if (Khách xác nhận đã nhận hoặc quá N ngày?) then (có)
+  :COMPLETED, tính vào doanh thu;
+else (chưa)
+  :Chờ;
+  detach
+endif
+stop
+@enduml

@@ -1,0 +1,34 @@
+@startuml uc-01-tai-khoan
+!include ../_style.puml
+title Use Case phân rã – Tài khoản
+left to right direction
+
+actor "Khách vãng lai" as Guest
+actor "Khách hàng" as Customer
+Customer -|> Guest
+
+rectangle "Tài khoản" {
+  usecase "Đăng ký" as Reg
+  usecase "Đăng nhập" as Login
+  usecase "Đăng xuất" as Logout
+  usecase "Cập nhật thông tin cá nhân" as Profile
+  usecase "Đổi mật khẩu" as ChangePw
+  usecase "Quản lý địa chỉ nhận hàng" as Addr
+  usecase "Thêm địa chỉ" as AddrAdd
+  usecase "Sửa địa chỉ" as AddrEdit
+  usecase "Xóa địa chỉ" as AddrDel
+  usecase "Đặt địa chỉ mặc định" as AddrDefault
+}
+
+Guest --> Reg
+Guest --> Login
+Customer --> Logout
+Customer --> Profile
+Customer --> ChangePw
+Customer --> Addr
+
+Addr <.. AddrAdd : <<extend>>
+Addr <.. AddrEdit : <<extend>>
+Addr <.. AddrDel : <<extend>>
+Addr <.. AddrDefault : <<extend>>
+@enduml

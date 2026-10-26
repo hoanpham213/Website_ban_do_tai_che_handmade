@@ -1,0 +1,36 @@
+@startuml sd-08-chatbot-tra-cuu-don
+!include ../_style.puml
+title Biểu đồ tuần tự – Chatbot tra cứu đơn hàng (function calling)
+autonumber
+actor "Khách hàng" as U
+participant "Giao diện web" as FE
+participant "Backend\n(dịch vụ chatbot)" as BE
+participant "Dịch vụ LLM" as LLM
+database "CSDL" as DB
+
+U -> FE : "Đơn GOM2610050001 của tôi tới đâu rồi?"
+FE -> BE : Gửi tin nhắn + phiên
+BE -> LLM : Hướng dẫn hệ thống, lịch sử hội thoại,\ntin nhắn, danh sách hàm được phép
+alt Dịch vụ LLM lỗi hoặc quá thời gian
+  BE --> FE : Câu trả lời dự phòng + gợi ý vào trang "Đơn hàng của tôi"
+else Bình thường
+  LLM --> BE : Yêu cầu gọi hàm get_my_order_detail(order_code)
+  note right of BE
+    Hàm KHÔNG có tham số user_id.
+    Backend tự gắn user_id từ phiên.
+  end note
+  alt Chưa đăng nhập
+    BE -> LLM : Kết quả hàm: "cần đăng nhập"
+  else Đã đăng nhập
+    BE -> DB : Đọc orders, order_items, payments\ntheo order_code VÀ user_id trong phiên
+    DB --> BE : Đơn hàng hoặc rỗng
+    BE -> LLM : Kết quả hàm (trạng thái đơn, thanh toán)\nhoặc "không tìm thấy"
+  end
+  LLM --> BE : Câu trả lời bằng ngôn ngữ tự nhiên
+  opt Có lưu lịch sử chat
+    BE -> DB : Thêm chat_messages (USER, TOOL, ASSISTANT)
+  end
+  BE --> FE : Câu trả lời
+end
+FE --> U : Hiển thị câu trả lời
+@enduml

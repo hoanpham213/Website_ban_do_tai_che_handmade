@@ -1,0 +1,53 @@
+@startuml uc-03-quan-tri-san-pham-kho
+!include ../_style.puml
+title Use Case phân rã – Quản trị sản phẩm và tồn kho
+left to right direction
+
+actor "Quản trị viên" as Admin
+
+rectangle "Sản phẩm và kho" {
+  usecase "Quản lý danh mục" as Cat
+  usecase "Quản lý thuộc tính" as Attr
+  usecase "Quản lý giá trị chọn sẵn" as AttrOpt
+  usecase "Gán bộ thuộc tính\ncho danh mục" as CatAttr
+
+  usecase "Quản lý sản phẩm" as Prod
+  usecase "Thêm, sửa sản phẩm" as ProdEdit
+  usecase "Ẩn, lưu trữ sản phẩm" as ProdHide
+  usecase "Quản lý hình ảnh" as ProdImg
+  usecase "Nhập câu chuyện nguồn gốc" as ProdStory
+  usecase "Khai báo vật liệu\nvà khối lượng tái sử dụng" as ProdMat
+  usecase "Nhập giá trị thuộc tính" as ProdAttr
+  usecase "Quản lý danh mục vật liệu" as Mat
+
+  usecase "Quản lý tồn kho" as Stock
+  usecase "Nhập kho" as StockIn
+  usecase "Điều chỉnh tồn kho" as StockAdj
+  usecase "Xem lịch sử biến động kho" as StockLog
+}
+
+Admin --> Cat
+Admin --> Attr
+Admin --> Prod
+Admin --> Mat
+Admin --> Stock
+
+Attr <.. AttrOpt : <<extend>>
+Cat <.. CatAttr : <<extend>>
+
+Prod <.. ProdEdit : <<extend>>
+Prod <.. ProdHide : <<extend>>
+Prod <.. ProdImg : <<extend>>
+ProdEdit ..> ProdStory : <<include>>
+ProdEdit ..> ProdMat : <<include>>
+ProdEdit ..> ProdAttr : <<include>>
+
+Stock <.. StockIn : <<extend>>
+Stock <.. StockAdj : <<extend>>
+Stock <.. StockLog : <<extend>>
+
+note right of ProdAttr
+  Ô nhập thuộc tính hiện theo
+  bộ thuộc tính của danh mục
+end note
+@enduml

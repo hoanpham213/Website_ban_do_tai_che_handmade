@@ -1,0 +1,45 @@
+@startuml sd-04-dat-hang
+!include ../_style.puml
+title Biểu đồ tuần tự – Đặt hàng (giữ hàng chống bán vượt)
+autonumber
+actor "Khách hàng" as U
+participant "Giao diện web" as FE
+participant "Backend" as BE
+database "CSDL" as DB
+participant "Cổng thanh toán" as PG
+
+U -> FE : Chọn địa chỉ, phương thức thanh toán, bấm "Đặt hàng"
+FE -> BE : Gửi yêu cầu (address_id, method, tổng tiền đang hiển thị)
+BE -> DB : Đọc cart_items, products, product_materials, addresses
+DB --> BE : Dữ liệu giỏ và địa chỉ
+BE -> BE : Kiểm tra sản phẩm ACTIVE, địa chỉ thuộc khách,\ntính lại tổng tiền
+alt Giá hoặc sản phẩm đã thay đổi
+  BE --> FE : Báo thay đổi, yêu cầu xác nhận lại
+else Hợp lệ
+  BE -> DB : BEGIN
+  loop Từng sản phẩm, theo product_id tăng dần
+    BE -> DB : Cập nhật inventories: reserved += q\nCHỈ KHI on_hand − reserved ≥ q
+    DB --> BE : Số dòng được cập nhật
+    opt 0 dòng (không đủ hàng)
+      BE -> DB : ROLLBACK
+      BE --> FE : Lỗi "Sản phẩm X vừa hết hàng"
+    end
+  end
+  BE -> DB : Thêm orders (PENDING, snapshot địa chỉ, tổng tiền,\npayment_deadline nếu ONLINE)
+  BE -> DB : Thêm order_items (snapshot tên, đơn giá, khối lượng)
+  BE -> DB : Thêm payments (method, amount, UNPAID)
+  BE -> DB : Thêm inventory_transactions (RESERVE)\nvà order_status_histories (→ PENDING)
+  BE -> DB : Xóa các cart_items đã đặt
+  BE -> DB : COMMIT
+  alt method = COD
+    BE --> FE : Đặt hàng thành công (order_code)
+    FE --> U : Hiển thị trang đặt hàng thành công
+  else method = ONLINE
+    BE -> PG : Tạo yêu cầu thanh toán (transaction_ref, amount)
+    PG --> BE : URL thanh toán
+    BE -> DB : Lưu payments.transaction_ref
+    BE --> FE : URL thanh toán
+    FE --> U : Chuyển hướng sang cổng thanh toán
+  end
+end
+@enduml

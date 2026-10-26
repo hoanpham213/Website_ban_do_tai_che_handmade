@@ -1,0 +1,16 @@
+@startuml erd-chi-tiet
+!include ../_style.puml
+title ERD chi tiết – CSDL GOM (22 bảng + 2 bảng tùy chọn)
+hide circle
+hide empty members
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 60
+!include _entities.puml
+!include _relations.puml
+legend bottom left
+  * = NOT NULL · PK = khóa chính · FK = khóa ngoại · UQ = duy nhất
+  + timestamps = created_at, updated_at
+  pav = product_attribute_values · osh = order_status_histories
+endlegend
+@enduml

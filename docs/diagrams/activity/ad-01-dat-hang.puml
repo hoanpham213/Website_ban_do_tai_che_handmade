@@ -1,0 +1,63 @@
+@startuml ad-01-dat-hang
+!include ../_style.puml
+title Biểu đồ hoạt động – Đặt hàng
+
+|Khách hàng|
+start
+:Mở giỏ hàng;
+:Chọn địa chỉ giao hàng;
+:Chọn phương thức thanh toán;
+:Bấm "Đặt hàng";
+
+|Hệ thống|
+:Đọc giỏ hàng, sản phẩm, địa chỉ;
+if (Sản phẩm còn bán và giá không đổi?) then (không)
+  :Báo thay đổi trong giỏ;
+  |Khách hàng|
+  :Xem lại giỏ hàng;
+  stop
+else (có)
+endif
+
+|Hệ thống|
+:Mở transaction;
+:Giữ hàng từng sản phẩm\n(reserved += q nếu đủ hàng);
+if (Tất cả sản phẩm giữ được?) then (không)
+  :Rollback;
+  :Báo "sản phẩm vừa hết hàng";
+  |Khách hàng|
+  :Điều chỉnh giỏ hàng;
+  stop
+else (có)
+endif
+
+|Hệ thống|
+:Tạo đơn PENDING, dòng hàng (snapshot),\nthanh toán UNPAID, nhật ký kho, lịch sử trạng thái;
+:Xóa sản phẩm đã đặt khỏi giỏ;
+:Commit;
+
+if (Phương thức thanh toán?) then (COD)
+  :Thông báo đặt hàng thành công\n(kèm mã đơn hàng);
+  stop
+else (ONLINE)
+  :Tạo yêu cầu thanh toán,\nđặt hạn thanh toán;
+endif
+
+|Khách hàng|
+:Thanh toán trên cổng;
+
+|Hệ thống|
+if (Cổng báo thành công?) then (có)
+  :Payment → PAID;
+  :Thông báo thanh toán thành công;
+else (không)
+  :Payment → FAILED;
+  :Cho phép thanh toán lại trước hạn;
+  note right
+    Quá hạn mà chưa PAID:
+    hệ thống hủy đơn
+    và trả hàng về kho
+  end note
+endif
+stop
+@enduml

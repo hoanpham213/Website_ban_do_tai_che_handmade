@@ -1,0 +1,38 @@
+@startuml sd-05-thanh-toan-truc-tuyen
+!include ../_style.puml
+title Biểu đồ tuần tự – Thanh toán trực tuyến (môi trường thử nghiệm)
+autonumber
+actor "Khách hàng" as U
+participant "Cổng thanh toán" as PG
+participant "Backend" as BE
+database "CSDL" as DB
+participant "Giao diện web" as FE
+
+U -> PG : Thanh toán trên trang của cổng
+PG -> BE : Thông báo kết quả (transaction_ref, kết quả, chữ ký)
+BE -> BE : Kiểm tra chữ ký
+alt Chữ ký sai
+  BE --> PG : Từ chối
+else Chữ ký đúng
+  BE -> DB : Tìm payments theo transaction_ref (kèm orders)
+  DB --> BE : payment, order
+  alt payment không còn UNPAID (đã xử lý trước đó)
+    BE --> PG : Xác nhận đã nhận (không cập nhật lại)
+  else Thành công
+    BE -> DB : payments: PAID, paid_at, provider_response
+    opt orders.status = CANCELLED (hết hạn trước khi tiền về)
+      BE -> BE : Đưa đơn vào danh sách cần hoàn tiền
+    end
+    BE --> PG : Xác nhận đã nhận
+  else Thất bại
+    BE -> DB : payments: FAILED, provider_response
+    BE --> PG : Xác nhận đã nhận
+  end
+end
+PG --> U : Chuyển về trang kết quả của GOM
+U -> FE : Mở trang kết quả
+FE -> BE : Hỏi trạng thái thanh toán của đơn
+BE -> DB : Đọc payments (đơn thuộc user trong phiên)
+BE --> FE : Trạng thái
+FE --> U : Hiển thị "Thanh toán thành công" hoặc "Thất bại"
+@enduml
