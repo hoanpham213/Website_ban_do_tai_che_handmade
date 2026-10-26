@@ -19,6 +19,18 @@ export async function signIn({ email, password }) {
   if (error) throw error;
 }
 
+const OAUTH_PROVIDERS = ['google', 'facebook'];
+
+/** Đăng nhập bằng Google / Facebook (trình duyệt chuyển sang trang nhà cung cấp rồi quay lại trang hiện tại). */
+export async function signInWithProvider(provider) {
+  if (!OAUTH_PROVIDERS.includes(provider)) throw new Error('PROVIDER_NOT_SUPPORTED');
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: { redirectTo: window.location.href },
+  });
+  if (error) throw error;
+}
+
 export async function signOut() {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;

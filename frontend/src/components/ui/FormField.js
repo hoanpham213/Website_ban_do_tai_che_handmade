@@ -1,4 +1,5 @@
 import { el } from '../../lib/dom.js';
+import { Icon } from './Icon.js';
 
 const INPUT_CLASS =
   'block w-full min-h-11 rounded-lg border border-stone-300 bg-white px-3 py-2 text-base ' +
@@ -7,11 +8,12 @@ const INPUT_CLASS =
 /**
  * Ô nhập có nhãn và chỗ hiện lỗi. Dùng cho input, textarea.
  * @param {{ name: string, label: string, type?: string, required?: boolean, value?: string,
- *           placeholder?: string, autocomplete?: string, multiline?: boolean, maxLength?: number, hint?: string }} props
+ *           placeholder?: string, autocomplete?: string, multiline?: boolean, maxLength?: number, hint?: string,
+ *           revealable?: boolean }} props   revealable: ô mật khẩu có nút con mắt hiện/ẩn
  */
 export function FormField({
   name, label, type = 'text', required = false, value = '', placeholder,
-  autocomplete, multiline = false, maxLength, hint,
+  autocomplete, multiline = false, maxLength, hint, revealable = false,
 }) {
   const id = `field-${name}`;
   const errorId = `${id}-error`;
@@ -22,16 +24,33 @@ export function FormField({
 
   const control = multiline
     ? el('textarea', { className: `${INPUT_CLASS} min-h-24`, text: value, attrs: { ...attrs, rows: 4 } })
-    : el('input', { className: INPUT_CLASS, attrs: { ...attrs, type, value } });
+    : el('input', { className: `${INPUT_CLASS}${revealable ? ' pr-12' : ''}`, attrs: { ...attrs, type, value } });
+  const field = revealable && type === 'password' ? withRevealButton(control) : control;
 
   return el('div', { className: 'space-y-1', attrs: { 'data-field': name } }, [
     el('label', { className: 'block text-sm font-medium text-stone-700', text: label, attrs: { for: id } }, [
       required ? el('span', { className: 'text-red-700', text: ' *', attrs: { 'aria-hidden': 'true' } }) : null,
     ]),
-    control,
+    field,
     hint ? el('p', { className: 'text-xs text-stone-500', text: hint }) : null,
     el('p', { className: 'text-sm text-red-700', attrs: { id: errorId, 'aria-live': 'polite' } }),
   ]);
+}
+
+/** Bọc ô mật khẩu với nút con mắt để xem/ẩn mật khẩu đang gõ. */
+function withRevealButton(input) {
+  const button = el('button', {
+    className: 'absolute inset-y-0 right-0 flex w-11 items-center justify-center text-stone-600 hover:text-brand-700',
+    attrs: { type: 'button', 'aria-label': 'Hiện mật khẩu', 'aria-pressed': 'false' },
+  }, [Icon({ name: 'eye' })]);
+  button.addEventListener('click', () => {
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    button.setAttribute('aria-pressed', String(show));
+    button.setAttribute('aria-label', show ? 'Ẩn mật khẩu' : 'Hiện mật khẩu');
+    button.replaceChildren(Icon({ name: show ? 'eyeSlash' : 'eye' }));
+  });
+  return el('div', { className: 'relative' }, [input, button]);
 }
 
 /** Hiện / xóa lỗi của một ô trong form. */

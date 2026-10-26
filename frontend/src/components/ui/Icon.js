@@ -10,7 +10,13 @@ const ICONS = {
   search: 'fa-magnifying-glass',
   close: 'fa-xmark',
   chevron: 'fa-chevron-down',
+  eye: 'fa-eye',
+  eyeSlash: 'fa-eye-slash',
+  google: 'fa-google',
+  facebook: 'fa-facebook-f',
 };
+
+const BRAND_ICONS = new Set(['google', 'facebook']);
 
 /**
  * @param {{ name: keyof ICONS, className?: string, filled?: boolean }} props
@@ -21,7 +27,7 @@ const ICONS = {
  */
 export function Icon({ name, className = '', filled = false }) {
   const hasOutline = name === 'heart';
-  const style = hasOutline && !filled ? 'fa-regular' : 'fa-solid';
+  const style = BRAND_ICONS.has(name) ? 'fa-brands' : hasOutline && !filled ? 'fa-regular' : 'fa-solid';
   const icon = document.createElement('i');
   icon.className = `${style} ${ICONS[name] ?? ''} ${className}`.trim();
   icon.setAttribute('aria-hidden', 'true');

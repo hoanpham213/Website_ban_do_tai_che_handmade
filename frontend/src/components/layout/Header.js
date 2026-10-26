@@ -1,6 +1,7 @@
 import { el } from '../../lib/dom.js';
 import { SITE } from '../../config/site.js';
 import { Icon } from '../ui/Icon.js';
+import { openLoginDialog } from '../auth/LoginDialog.js';
 import logoUrl from '../../assets/logo.png';
 
 const LINK_CLASS = 'rounded-md px-2.5 py-1.5 text-sm font-medium text-brand-800 hover:bg-cream-100 aria-[current=page]:bg-brand-100 aria-[current=page]:text-brand-700';
@@ -175,7 +176,7 @@ function MobileSearch() {
  * Thanh điều hướng 3 cột, nền trong suốt:
  *   Trái:  nút menu (popup) + kính lúp tìm kiếm
  *   Giữa:  logo
- *   Phải:  nút người dùng (popup: Tài khoản, Đăng xuất; khách: Đăng nhập, Đăng ký)
+ *   Phải:  nút người dùng (đã đăng nhập: popup Tài khoản, Đăng xuất; khách: bấm mở form đăng nhập)
  * @param {{ profile: object|null, cartCount: number, onSignOut: Function, area?: 'shop'|'admin', overlay?: boolean }} props
  *   overlay: true → header đè lên phần đầu nội dung bên dưới (banner tràn màn hình)
  * @returns {{ element: HTMLElement, setCartCount: (n: number) => void }}
@@ -218,26 +219,32 @@ export function Header({ profile, cartCount = 0, onSignOut, area = 'shop', overl
     className: `${LINK_CLASS} text-left`, text: 'Đăng xuất',
     attrs: { type: 'button', 'data-close': true }, on: { click: onSignOut },
   });
-  let userItems;
+  let userControl;
   if (!profile) {
-    userItems = links([{ label: 'Đăng nhập', href: '/login.html' }, { label: 'Đăng ký', href: '/register.html' }]);
-  } else if (isShop) {
-    userItems = [
-      ...links(SITE.accountNav),
-      ...(profile.role === 'ADMIN' ? links([{ label: 'Quản trị', href: '/admin/' }]) : []),
-      signOutItem,
-    ];
+    // Khách: bấm icon mở thẳng form đăng nhập (hộp thoại), không qua menu chọn
+    const loginButton = el('button', {
+      className: ICON_BUTTON_CLASS,
+      attrs: { type: 'button', 'aria-label': 'Đăng nhập', 'aria-haspopup': 'dialog' },
+      on: { click: openLoginDialog },
+    }, [Icon({ name: 'user', className: 'text-xl' })]);
+    userControl = loginButton;
   } else {
-    userItems = [...links([{ label: 'Về cửa hàng', href: '/' }]), signOutItem];
+    const userItems = isShop
+      ? [
+        ...links(SITE.accountNav),
+        ...(profile.role === 'ADMIN' ? links([{ label: 'Quản trị', href: '/admin/' }]) : []),
+        signOutItem,
+      ]
+      : [...links([{ label: 'Về cửa hàng', href: '/' }]), signOutItem];
+    userControl = PopupMenu({
+      id: 'user-menu',
+      label: 'Tài khoản',
+      buttonContent: [Icon({ name: 'user', className: 'text-xl' })],
+      items: userItems,
+      align: 'right',
+      widthClass: 'w-36',
+    }).element;
   }
-  const userMenu = PopupMenu({
-    id: 'user-menu',
-    label: profile ? 'Tài khoản' : 'Đăng nhập hoặc đăng ký',
-    buttonContent: [Icon({ name: 'user', className: 'text-xl' })],
-    items: userItems,
-    align: 'right',
-    widthClass: 'w-36',
-  });
 
   // --- Logo (giữa)
   const logo = el('a', {
@@ -249,7 +256,7 @@ export function Header({ profile, cartCount = 0, onSignOut, area = 'shop', overl
     el('div', { className: 'page-container grid grid-cols-[1fr_auto_1fr] items-center gap-2 py-2' }, [
       el('div', { className: 'flex min-w-0 items-center gap-1' }, [navMenu.element, mobileSearch?.button, desktopSearch]),
       logo,
-      el('div', { className: 'flex justify-end' }, [userMenu.element]),
+      el('div', { className: 'flex justify-end' }, [userControl]),
     ]),
     mobileSearch?.row,
   ]);

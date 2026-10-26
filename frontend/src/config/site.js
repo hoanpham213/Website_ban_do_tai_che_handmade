@@ -9,6 +9,9 @@ export const SITE = Object.freeze({
     'GOM có ý nghĩa gom góp những giá trị cũ, biến vật liệu cũ thành sản phẩm hữu ích và độc đáo.',
     'GOM nhằm hướng người mua tới các sản phẩm xanh - khuyến khích giảm thiểu rác thải và lan tỏa lối sống xanh.',
   ],
+  // Đăng nhập bằng mạng xã hội. Chỉ thêm 'google' / 'facebook' vào danh sách SAU KHI đã bật và cấu hình
+  // nhà cung cấp đó trong Supabase → Authentication → Providers. Rỗng = không hiện nút.
+  socialProviders: [],
   contact: {
     email: '',
     phone: '',
