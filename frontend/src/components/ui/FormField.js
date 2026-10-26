@@ -37,18 +37,18 @@ export function FormField({
   ]);
 }
 
-/** Bọc ô mật khẩu với nút con mắt để xem/ẩn mật khẩu đang gõ. */
+/** Bọc ô mật khẩu với nút con mắt: mắt = mật khẩu đang hiển thị, mắt gạch chéo = mật khẩu đang bị che. Bấm để đổi. */
 function withRevealButton(input) {
   const button = el('button', {
     className: 'absolute inset-y-0 right-0 flex w-11 items-center justify-center text-stone-600 hover:text-brand-700',
     attrs: { type: 'button', 'aria-label': 'Hiện mật khẩu', 'aria-pressed': 'false' },
-  }, [Icon({ name: 'eye' })]);
+  }, [Icon({ name: 'eyeSlash' })]);   // đang ẩn mật khẩu → hiện mắt gạch chéo
   button.addEventListener('click', () => {
     const show = input.type === 'password';
     input.type = show ? 'text' : 'password';
     button.setAttribute('aria-pressed', String(show));
     button.setAttribute('aria-label', show ? 'Ẩn mật khẩu' : 'Hiện mật khẩu');
-    button.replaceChildren(Icon({ name: show ? 'eyeSlash' : 'eye' }));
+    button.replaceChildren(Icon({ name: show ? 'eye' : 'eyeSlash' }));   // mắt = đang xem được, mắt gạch chéo = đang ẩn
   });
   return el('div', { className: 'relative' }, [input, button]);
 }
