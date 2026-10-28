@@ -9,6 +9,7 @@ const ICONS = {
   cart: 'fa-cart-shopping',
   search: 'fa-magnifying-glass',
   close: 'fa-xmark',
+  back: 'fa-arrow-left',
   chevron: 'fa-chevron-down',
   eye: 'fa-eye',
   eyeSlash: 'fa-eye-slash',

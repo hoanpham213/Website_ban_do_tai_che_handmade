@@ -40,9 +40,11 @@ function SocialButtons(formError) {
 
 /**
  * Form đăng nhập dùng chung cho trang /login.html và hộp thoại ở header.
- * @param {{ onSuccess: () => void }} props  gọi sau khi đăng nhập thành công (chuyển trang / tải lại trang)
+ * @param {{ onSuccess: () => void, onSwitchToRegister?: () => void }} props
+ *   onSuccess: gọi sau khi đăng nhập thành công (chuyển trang / tải lại trang)
+ *   onSwitchToRegister: nếu có (trong hộp thoại) thì bấm "Đăng ký" sẽ đổi sang form đăng ký thay vì chuyển trang
  */
-export function LoginForm({ onSuccess }) {
+export function LoginForm({ onSuccess, onSwitchToRegister }) {
   const formError = el('p', { className: 'text-sm text-red-700', attrs: { role: 'alert' } });
   const submit = Button({ label: 'Đăng nhập', type: 'submit', className: 'w-full rounded-full' });
   const form = el('form', { className: 'space-y-4', attrs: { novalidate: true } }, [
@@ -82,7 +84,12 @@ export function LoginForm({ onSuccess }) {
     SocialButtons(formError),
     el('p', { className: 'text-sm text-stone-700' }, [
       'Bạn chưa có tài khoản? ',
-      el('a', { className: 'font-semibold text-brand-600 underline hover:text-brand-800', text: 'Đăng ký', attrs: { href: '/register.html' } }),
+      el('a', {
+        className: 'font-semibold text-brand-600 underline hover:text-brand-800',
+        text: 'Đăng ký',
+        attrs: { href: '/register.html' },
+        on: onSwitchToRegister ? { click: (event) => { event.preventDefault(); onSwitchToRegister(); } } : undefined,
+      }),
     ]),
   ]);
 }
