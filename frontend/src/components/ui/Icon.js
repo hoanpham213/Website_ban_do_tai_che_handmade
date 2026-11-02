@@ -15,6 +15,13 @@ const ICONS = {
   eyeSlash: 'fa-eye-slash',
   google: 'fa-google',
   facebook: 'fa-facebook-f',
+  recycle: 'fa-recycle',
+  handmade: 'fa-hand-holding-heart',
+  truck: 'fa-truck-fast',
+  payment: 'fa-credit-card',
+  undo: 'fa-rotate-left',
+  mail: 'fa-envelope',
+  phone: 'fa-phone',
 };
 
 const BRAND_ICONS = new Set(['google', 'facebook']);

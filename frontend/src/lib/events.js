@@ -3,6 +3,7 @@
 export const EVENTS = Object.freeze({
   CART_CHANGED: 'gom:cart-changed',
   FAVORITES_CHANGED: 'gom:favorites-changed',
+  OPEN_CHAT: 'gom:open-chat',
 });
 
 export function emit(name, detail) {

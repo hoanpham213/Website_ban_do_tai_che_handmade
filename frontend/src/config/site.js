@@ -17,6 +17,14 @@ export const SITE = Object.freeze({
     phone: '',
     address: '',
   },
+  // Cam kết hiển thị ở khu "Hỗ trợ" trang chủ (icon: tên trong components/ui/Icon.js).
+  // Chỉ ghi điều có thật trong hệ thống; thêm số liệu (phí ship, số ngày đổi trả...) khi chính sách đã chốt.
+  commitments: [
+    { icon: 'recycle', title: 'Từ vật liệu tái chế', text: 'Mỗi sản phẩm ghi rõ vật liệu được tái sử dụng.' },
+    { icon: 'handmade', title: 'Làm thủ công', text: 'Nhiều món là độc bản – chỉ có một chiếc.' },
+    { icon: 'payment', title: 'Thanh toán linh hoạt', text: 'Trả khi nhận hàng hoặc thanh toán trực tuyến.' },
+    { icon: 'undo', title: 'Hủy đơn dễ dàng', text: 'Bạn có thể hủy khi đơn chưa được đóng gói.' },
+  ],
   // Giới thiệu ngắn hiển thị ở trang chủ và trang Giới thiệu. CẦN CẬP NHẬT theo câu chuyện thật.
   about: {
     mission: 'GOM gom nhặt những vật liệu tưởng như bỏ đi – vải jean cũ, chai nhựa, gỗ pallet – '

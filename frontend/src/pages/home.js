@@ -1,46 +1,51 @@
 import { initPage } from '../app.js';
 import { el, render } from '../lib/dom.js';
-import { toUserMessage } from '../lib/errors.js';
-import { searchProducts } from '../services/products.js';
-import { ProductGrid } from '../components/product/ProductCard.js';
-import { LoadingSkeleton, EmptyState, ErrorState } from '../components/common/States.js';
+import { getMaterials, searchProducts } from '../services/products.js';
 import { HeroBanner } from '../components/home/HeroBanner.js';
-import { PRODUCT_LINES } from '../config/constants.js';
+import { ProductShowcase } from '../components/home/ProductShowcase.js';
+import { SupportSection } from '../components/home/SupportSection.js';
+import { MATERIAL_GROUPS } from '../config/constants.js';
 
+// Thứ tự: Banner → Bán chạy → Sản phẩm tiêu biểu theo vật liệu → Hỗ trợ.
 initPage({
   title: 'Trang chủ',
   fullWidth: true,
-  render: async (main) => {
-    const latest = el('section', { attrs: { 'aria-labelledby': 'latest-title' } });
+  render: (main) => {
+    // Tạm: "bán chạy" = sản phẩm mới nhất. Khi có dữ liệu bán hàng, đổi nguồn ở bestSellers() này.
+    const bestSellers = ProductShowcase({
+      id: 'best-sellers-title',
+      title: 'Sản phẩm bán chạy',
+      href: '/products.html',
+      emptyMessage: 'Cửa hàng đang chuẩn bị những món đồ đầu tiên.',
+      loadItems: async () => (await searchProducts({ sort: 'newest', limit: 4 })).items,
+    });
+
+    // Danh sách vật liệu chỉ tải một lần, dùng chung cho cả 4 khu.
+    let materialsPromise = null;
+    const loadMaterials = () => {
+      materialsPromise ??= getMaterials().catch((error) => { materialsPromise = null; throw error; });
+      return materialsPromise;
+    };
+
+    const materialSections = Object.entries(MATERIAL_GROUPS).map(([key, group]) => ProductShowcase({
+      id: `material-${key}-title`,
+      title: group.label,
+      href: `/products.html?material=${key}`,
+      hideWhenEmpty: true,
+      loadItems: async () => {
+        const keyword = group.keyword.normalize('NFC').toLowerCase();
+        const materialIds = (await loadMaterials())
+          .filter((m) => m.name.normalize('NFC').toLowerCase().includes(keyword))
+          .map((m) => m.id);
+        // Không có vật liệu khớp: không được bỏ lọc (sẽ hiện nhầm toàn bộ sản phẩm)
+        if (materialIds.length === 0) return [];
+        return (await searchProducts({ materialIds, sort: 'newest', limit: 4 })).items;
+      },
+    }));
+
     render(main,
       HeroBanner(),
-      el('div', { className: 'page-container py-6' }, [
-      // Hai lối vào chính: Tái chế / Handmade
-      el('section', { className: 'mb-10 grid gap-4 sm:grid-cols-2', attrs: { 'aria-label': 'Dòng sản phẩm' } },
-        Object.entries(PRODUCT_LINES).map(([key, line]) => el('a', {
-          className: 'block rounded-2xl bg-white p-6 shadow-sm ring-1 ring-cream-200 transition hover:shadow-md hover:ring-brand-500',
-          attrs: { href: `/products.html?line=${key}` },
-        }, [
-          el('h2', { className: 'text-xl font-semibold text-brand-700', text: line.label }),
-          el('p', { className: 'mt-1 text-sm text-stone-600', text: line.description }),
-          el('span', { className: 'mt-4 inline-block text-sm font-medium text-earth-700', text: 'Xem sản phẩm →' }),
-        ]))),
-      latest,
-      ]),
+      el('div', { className: 'page-container py-8' }, [bestSellers, ...materialSections, SupportSection()]),
     );
-    await loadLatest(latest);
   },
 });
-
-async function loadLatest(container) {
-  render(container, el('h2', { className: 'mb-6 text-2xl font-bold text-stone-900 sm:text-3xl', text: 'Sản phẩm mới', attrs: { id: 'latest-title' } }), LoadingSkeleton({ variant: 'cards', count: 4 }));
-  try {
-    const { items } = await searchProducts({ sort: 'newest', limit: 8 });
-    render(container, container.firstChild,
-      items.length > 0
-        ? ProductGrid({ products: items })
-        : EmptyState({ title: 'Chưa có sản phẩm', message: 'Cửa hàng đang chuẩn bị những món đồ đầu tiên.' }));
-  } catch (error) {
-    render(container, container.firstChild, ErrorState({ message: toUserMessage(error), onRetry: () => loadLatest(container) }));
-  }
-}

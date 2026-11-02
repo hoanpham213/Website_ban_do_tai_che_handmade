@@ -2,6 +2,7 @@ import { el } from '../../lib/dom.js';
 import { sendChatMessage } from '../../services/chatbot.js';
 import { toUserMessage } from '../../lib/errors.js';
 import { CHAT_MAX_LENGTH } from '../../config/constants.js';
+import { on, EVENTS } from '../../lib/events.js';
 
 /** Nút chat nổi + khung hội thoại. Nội dung tin nhắn luôn hiển thị bằng textContent. */
 export function ChatWidget() {
@@ -34,15 +35,17 @@ export function ChatWidget() {
     className: 'fixed bottom-4 right-4 z-50 min-h-12 rounded-full bg-brand-700 px-5 text-sm font-semibold text-white shadow-lg',
     text: 'Hỏi GOM',
     attrs: { type: 'button', 'aria-controls': 'chat-panel', 'aria-expanded': 'false' },
-    on: {
-      click: () => {
-        const open = panel.classList.toggle('hidden') === false;
-        panel.classList.toggle('flex', open);
-        toggle.setAttribute('aria-expanded', String(open));
-        if (open) input.focus();
-      },
-    },
+    on: { click: () => setOpen(panel.classList.contains('hidden')) },
   });
+
+  function setOpen(open) {
+    panel.classList.toggle('hidden', !open);
+    panel.classList.toggle('flex', open);
+    toggle.setAttribute('aria-expanded', String(open));
+    if (open) input.focus();
+  }
+  // Các nơi khác (ví dụ khu Hỗ trợ ở trang chủ) mở khung chat bằng sự kiện này.
+  on(EVENTS.OPEN_CHAT, () => setOpen(true));
 
   async function onSubmit(event) {
     event.preventDefault();
