@@ -30,7 +30,7 @@ initPage({
     const materialSections = Object.entries(MATERIAL_GROUPS).map(([key, group]) => ProductShowcase({
       id: `material-${key}-title`,
       title: group.label,
-      href: `/products.html?material=${key}`,
+      href: group.page ?? `/products.html?material=${key}`,
       hideWhenEmpty: true,
       loadItems: async () => {
         const keyword = group.keyword.normalize('NFC').toLowerCase();

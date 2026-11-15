@@ -29,6 +29,14 @@ export async function getMaterials() {
   return data;
 }
 
+/** Id các vật liệu có tên chứa từ khóa của nhóm (MATERIAL_GROUPS). Rỗng nếu chưa có vật liệu nào khớp. */
+export async function findMaterialIds(keyword) {
+  const wanted = keyword.normalize('NFC').toLowerCase();
+  return (await getMaterials())
+    .filter((m) => m.name.normalize('NFC').toLowerCase().includes(wanted))
+    .map((m) => m.id);
+}
+
 /**
  * Tìm kiếm có phân trang. Trả { items, total }.
  * @param {{ line?: 'recycled'|'handmade'|null, categoryId?: number, keyword?: string, minPrice?: number,

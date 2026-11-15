@@ -42,7 +42,7 @@ export const SITE = Object.freeze({
       label: 'Sản phẩm',
       href: '/products.html',
       children: [
-        { label: 'Giấy', href: '/products.html?material=giay' },
+        { label: 'Giấy', href: '/materials/giay.html' },
         { label: 'Thủy tinh', href: '/products.html?material=thuy-tinh' },
         { label: 'Gỗ', href: '/products.html?material=go' },
         { label: 'Nhựa', href: '/products.html?material=nhua' },

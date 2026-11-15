@@ -41,9 +41,9 @@ export const PRODUCT_LINES = Object.freeze({
 
 // Nhóm vật liệu ở menu Sản phẩm (khóa = giá trị ?material= trên URL).
 // keyword: so khớp (không phân biệt hoa thường) với tên vật liệu trong bảng `materials`,
-// ví dụ 'giấy' khớp "Giấy tái chế". Thêm nhóm mới: thêm một dòng ở đây và vật liệu tương ứng trong database.
+// ví dụ 'giấy' khớp "Giấy tái chế". page (tùy chọn): trang riêng của nhóm; chưa có thì dùng /products.html?material=... Thêm nhóm mới: thêm một dòng ở đây và vật liệu tương ứng trong database.
 export const MATERIAL_GROUPS = Object.freeze({
-  giay: { label: 'Giấy', keyword: 'giấy' },
+  giay: { label: 'Giấy', keyword: 'giấy', page: '/materials/giay.html' },
   'thuy-tinh': { label: 'Thủy tinh', keyword: 'thủy tinh' },
   go: { label: 'Gỗ', keyword: 'gỗ' },
   nhua: { label: 'Nhựa', keyword: 'nhựa' },

@@ -15,6 +15,8 @@ const pages = [
   // Trang quản trị
   'admin/index', 'admin/products', 'admin/categories', 'admin/inventory',
   'admin/orders', 'admin/users', 'admin/knowledge',
+  // Trang riêng theo vật liệu
+  'materials/giay',
 ];
 
 export default defineConfig({
