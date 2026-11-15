@@ -4,17 +4,43 @@ import { supabase } from '../lib/supabase.js';
 import { PAGE_SIZE, PRODUCT_IMAGE_BUCKET } from '../config/constants.js';
 
 // ---------- Đơn hàng ----------
-export async function listOrders({ status, page = 1 } = {}) {
+/**
+ * @param {{ status?: string, needsRefund?: boolean, page?: number }} [options]
+ *   needsRefund: chỉ lấy đơn đã hủy nhưng khách đã thanh toán (cần hoàn tiền).
+ */
+export async function listOrders({ status, needsRefund = false, page = 1 } = {}) {
   const from = (page - 1) * PAGE_SIZE;
+  // !inner: lọc theo thanh toán thì chỉ giữ đơn có thanh toán khớp điều kiện
+  const payments = needsRefund ? 'payments!inner ( method, status )' : 'payments ( method, status )';
   let query = supabase
     .from('orders')
-    .select('id, order_code, status, total_amount, recipient_name, created_at, payments ( method, status )', { count: 'exact' })
+    .select(`id, order_code, status, total_amount, recipient_name, created_at, ${payments}`, { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(from, from + PAGE_SIZE - 1);
-  if (status) query = query.eq('status', status);
+  if (needsRefund) {
+    query = query.eq('status', 'CANCELLED').eq('payments.status', 'PAID');
+  } else if (status) {
+    query = query.eq('status', status);
+  }
   const { data, error, count } = await query;
   if (error) throw error;
   return { items: data, total: count ?? 0 };
+}
+
+/** Chi tiết một đơn cho quản trị viên (RLS cho phép admin đọc mọi đơn). */
+export async function getOrderForAdmin(orderId) {
+  const { data, error } = await supabase
+    .from('orders')
+    .select(`id, order_code, status, recipient_name, recipient_phone, ship_province, ship_ward,
+             ship_street_address, customer_note, subtotal, shipping_fee, total_amount,
+             payment_deadline, cancel_reason, created_at,
+             order_items ( id, product_name, unit_price, quantity ),
+             payments ( method, status, paid_at, refunded_at ),
+             order_status_histories ( to_status, note, created_at )`)
+    .eq('id', orderId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
 }
 
 export async function updateOrderStatus(orderId, toStatus, note) {
