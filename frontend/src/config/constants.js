@@ -46,7 +46,7 @@ export const MATERIAL_GROUPS = Object.freeze({
   giay: { label: 'Giấy', keyword: 'giấy', page: '/materials/giay.html' },
   'thuy-tinh': { label: 'Thủy tinh', keyword: 'thủy tinh', page: '/materials/thuy-tinh.html' },
   go: { label: 'Gỗ', keyword: 'gỗ', page: '/materials/go.html' },
-  nhua: { label: 'Nhựa', keyword: 'nhựa' },
+  nhua: { label: 'Nhựa', keyword: 'nhựa', page: '/materials/nhua.html' },
 });
 
 export const SORT_OPTIONS = Object.freeze([
