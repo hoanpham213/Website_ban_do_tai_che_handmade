@@ -45,7 +45,7 @@ export const PRODUCT_LINES = Object.freeze({
 export const MATERIAL_GROUPS = Object.freeze({
   giay: { label: 'Giấy', keyword: 'giấy', page: '/materials/giay.html' },
   'thuy-tinh': { label: 'Thủy tinh', keyword: 'thủy tinh', page: '/materials/thuy-tinh.html' },
-  go: { label: 'Gỗ', keyword: 'gỗ' },
+  go: { label: 'Gỗ', keyword: 'gỗ', page: '/materials/go.html' },
   nhua: { label: 'Nhựa', keyword: 'nhựa' },
 });
 

@@ -16,7 +16,7 @@ const pages = [
   'admin/index', 'admin/products', 'admin/categories', 'admin/inventory',
   'admin/orders', 'admin/users', 'admin/knowledge',
   // Trang riêng theo vật liệu
-  'materials/giay', 'materials/thuy-tinh',
+  'materials/giay', 'materials/thuy-tinh', 'materials/go',
 ];
 
 export default defineConfig({
