@@ -8,6 +8,20 @@ export async function sendChatMessage(message, conversationId = null) {
   const { data, error } = await supabase.functions.invoke('chatbot', {
     body: { message: text, conversationId },
   });
-  if (error) throw error;
+  if (error) {
+    // Function trả mã lỗi dạng { error: 'RATE_LIMITED' }; đổi thành Error(mã) để toUserMessage dịch ra tiếng Việt.
+    const code = await readErrorCode(error);
+    throw code ? new Error(code) : error;
+  }
   return data; // { reply, conversationId, fallback }
+}
+
+async function readErrorCode(error) {
+  if (typeof error.context?.json !== 'function') return null;
+  try {
+    return (await error.context.json())?.error ?? null;
+  } catch (parseError) {
+    console.error(parseError);
+    return null;
+  }
 }

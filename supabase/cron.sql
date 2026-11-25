@@ -11,3 +11,7 @@ select cron.schedule('gom-expire-unpaid-orders', '* * * * *',
 -- Mỗi giờ: tự hoàn thành đơn đã giao quá số ngày cấu hình
 select cron.schedule('gom-auto-complete-orders', '0 * * * *',
   $$ select public.auto_complete_orders(); $$);
+
+-- Mỗi ngày 03:30 (UTC): xóa bộ đếm giới hạn chatbot đã quá 2 ngày (cần migration 0007)
+select cron.schedule('gom-cleanup-chat-rate-limits', '30 3 * * *',
+  $$ delete from public.chat_rate_limits where window_start < now() - interval '2 days'; $$);

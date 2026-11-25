@@ -33,6 +33,10 @@ const MESSAGES = {
   INVALID_IMAGE_TYPE: 'Chỉ chấp nhận ảnh JPEG, PNG hoặc WebP.',
   IMAGE_TOO_LARGE: 'Ảnh vượt quá 5 MB.',
   INVALID_MESSAGE: 'Tin nhắn trống hoặc quá dài.',
+  // Edge Function chatbot: giới hạn số lần gọi
+  RATE_LIMITED: 'Bạn hỏi hơi nhanh. Vui lòng chờ một chút rồi thử lại.',
+  DAILY_LIMIT: 'Bạn đã dùng hết lượt hỏi trợ lý hôm nay. Vui lòng quay lại vào ngày mai.',
+  CHAT_BUSY: 'Trợ lý đang quá tải. Vui lòng thử lại sau.',
   // Supabase Auth
   invalid_credentials: 'Email hoặc mật khẩu không đúng.',
   email_not_confirmed: 'Vui lòng xác nhận email trước khi đăng nhập.',

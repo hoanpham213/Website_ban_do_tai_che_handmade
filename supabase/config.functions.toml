@@ -3,7 +3,8 @@
 
 [functions.chatbot]
 entrypoint = "./functions/chatbot/index.js"
-verify_jwt = false   # khách chưa đăng nhập vẫn hỏi được; function tự đọc phiên nếu có
+verify_jwt = false   # khách chưa đăng nhập vẫn hỏi được; function tự đọc phiên nếu có.
+                     # Chống lạm dụng: function tự giới hạn số lần gọi (migration 0007) trước khi gọi LLM.
 
 [functions.payment-create]
 entrypoint = "./functions/payment-create/index.js"

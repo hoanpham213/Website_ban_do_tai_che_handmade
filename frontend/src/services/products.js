@@ -60,6 +60,13 @@ export async function searchProducts(params = {}) {
   return { items: data, total: data.length > 0 ? Number(data[0].total_count) : 0 };
 }
 
+/** Sản phẩm bán chạy nhất (theo đơn đang giao / đã giao / hoàn thành). Dòng trả về cùng dạng với searchProducts. */
+export async function getBestSellingProducts(limit = 4) {
+  const { data, error } = await supabase.rpc('get_best_selling_products', { p_limit: limit });
+  if (error) throw error;
+  return data;
+}
+
 export async function getProductBySlug(slug) {
   const { data, error } = await supabase
     .from('products')

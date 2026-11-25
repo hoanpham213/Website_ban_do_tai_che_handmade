@@ -1,6 +1,6 @@
 import { initPage } from '../app.js';
 import { el, render } from '../lib/dom.js';
-import { getMaterials, searchProducts } from '../services/products.js';
+import { getBestSellingProducts, getMaterials, searchProducts } from '../services/products.js';
 import { HeroBanner } from '../components/home/HeroBanner.js';
 import { ProductShowcase } from '../components/home/ProductShowcase.js';
 import { SupportSection } from '../components/home/SupportSection.js';
@@ -11,13 +11,14 @@ initPage({
   title: 'Trang chủ',
   fullWidth: true,
   render: (main) => {
-    // Tạm: "bán chạy" = sản phẩm mới nhất. Khi có dữ liệu bán hàng, đổi nguồn ở bestSellers() này.
+    // Bán chạy theo doanh số thật (hàm get_best_selling_products, migration 0008).
+    // Khi chưa có đơn nào, thứ tự giống "mới nhất".
     const bestSellers = ProductShowcase({
       id: 'best-sellers-title',
       title: 'Sản phẩm bán chạy',
       href: '/products.html',
       emptyMessage: 'Cửa hàng đang chuẩn bị những món đồ đầu tiên.',
-      loadItems: async () => (await searchProducts({ sort: 'newest', limit: 4 })).items,
+      loadItems: () => getBestSellingProducts(4),
     });
 
     // Danh sách vật liệu chỉ tải một lần, dùng chung cho cả 4 khu.

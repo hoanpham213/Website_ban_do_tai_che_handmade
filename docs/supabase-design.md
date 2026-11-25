@@ -2,7 +2,7 @@
 
 Tài liệu này thay thế các phần **người dùng, phân quyền, đặt hàng, thanh toán, chatbot** trong "GOM – Thiết kế cơ sở dữ liệu" khi triển khai trên Supabase. Các phần còn lại (thuộc tính động, tồn kho, snapshot, trạng thái đơn) giữ nguyên nguyên tắc, chỉ đổi cách thực thi.
 
-Mã nguồn tương ứng: `supabase/migrations/` (5 file, chạy theo thứ tự tên), `supabase/seed.sql`, `supabase/cron.sql`, `supabase/functions/`.
+Mã nguồn tương ứng: `supabase/migrations/` (8 file, chạy theo thứ tự tên), `supabase/seed.sql`, `supabase/cron.sql`, `supabase/functions/`.
 
 ## 1. Kiến trúc
 
@@ -58,6 +58,8 @@ Ba quy tắc xuyên suốt:
 | reviews | Qua hàm `get_product_reviews` | Thêm khi đã nhận hàng; đọc của mình | Đọc, ẩn/hiện | Trực tiếp (có điều kiện) |
 | knowledge_entries | Đọc mục đang bật | Đọc mục đang bật | Toàn quyền | Trực tiếp (admin) |
 | chat_conversations, chat_messages | — | Của mình | — | Edge Function chatbot, bằng phiên của người dùng |
+| favorites | — | Toàn quyền của mình (chỉ thêm sản phẩm ACTIVE) | — | Trực tiếp (migration 0006) |
+| chat_rate_limits | — | — | — | Chỉ `consume_chat_quota`, do Edge Function chatbot gọi bằng service_role (migration 0007) |
 
 Quyền cột: khách hàng chỉ sửa được `profiles.full_name`, `profiles.phone`; không đọc được `payments.provider_response`; khi tạo đánh giá chỉ ghi được `order_item_id`, `rating`, `comment`.
 
@@ -65,7 +67,8 @@ Quyền cột: khách hàng chỉ sửa được `profiles.full_name`, `profiles
 
 | Hàm | Ai gọi | Việc làm |
 | --- | --- | --- |
-| `search_products` | Mọi người | Tìm, lọc theo danh mục, giá, vật liệu, thuộc tính; phân trang |
+| `search_products` | Mọi người | Tìm, lọc theo dòng sản phẩm (tái chế / handmade), danh mục, giá, vật liệu, thuộc tính; phân trang |
+| `get_best_selling_products` | Mọi người | Sản phẩm ACTIVE xếp theo số lượng đã bán (đơn SHIPPING/DELIVERED/COMPLETED); không trả số đã bán hay thông tin đơn (migration 0008) |
 | `get_product_reviews` | Mọi người | Đánh giá đang hiển thị của một sản phẩm, không lộ thông tin đơn |
 | `place_order` | Khách hàng | Kiểm tra giỏ, giá, địa chỉ → giữ hàng → tạo đơn, dòng hàng, thanh toán, nhật ký → xóa giỏ |
 | `cancel_my_order` | Khách hàng | Hủy đơn của mình ở trạng thái cho phép, trả hàng về kho |
@@ -78,6 +81,7 @@ Quyền cột: khách hàng chỉ sửa được `profiles.full_name`, `profiles
 | `admin_dashboard_stats` | Quản trị viên | Doanh thu, đơn theo trạng thái, bán chạy, khối lượng tái sử dụng |
 | `prepare_online_payment` | Chỉ server | Gán mã giao dịch mới trước khi chuyển sang cổng |
 | `record_payment_result` | Chỉ server | Ghi kết quả thanh toán, gọi lặp lại vẫn an toàn |
+| `consume_chat_quota` | Chỉ server | Đếm và giới hạn số lần gọi chatbot (migration 0007) |
 | `expire_unpaid_orders` | pg_cron | Hủy đơn trực tuyến quá hạn, trả hàng về kho |
 | `auto_complete_orders` | pg_cron | Đơn giao quá N ngày → COMPLETED |
 
@@ -111,6 +115,8 @@ Sản phẩm độc bản đi qua đúng luồng này với tồn = 1: người 
 
 **Chatbot.** Edge Function `chatbot` tạo client bằng phiên của người gọi, nên mọi truy vấn của các hàm công cụ đều chịu RLS. Hàm tra đơn không nhận `user_id`: dù mô hình AI có hỏi đơn của người khác, database cũng chỉ trả đơn của người đang đăng nhập. Khách chưa đăng nhập nhận `LOGIN_REQUIRED`. LLM lỗi hoặc chưa cấu hình → câu trả lời dự phòng.
 
+**Giới hạn số lần gọi chatbot.** Function `chatbot` có `verify_jwt = false` nên khách ẩn danh gọi được; mỗi lần gọi LLM tốn tiền. Vì vậy ngay sau khi xác định người gọi (user id, hoặc mã băm của IP với khách), function gọi `consume_chat_quota` bằng client quyền cao, TRƯỚC khi đọc lịch sử hay gọi LLM. Ba lớp chặn: theo người gọi mỗi phút (mặc định 8), theo người gọi mỗi ngày (60), và tổng cả hệ thống mỗi ngày (1500, trần chi phí khi kẻ xấu đổi IP). Vượt hạn mức → HTTP 429 với mã `RATE_LIMITED`, `DAILY_LIMIT` hoặc `CHAT_BUSY`; không kiểm tra được hạn mức (lỗi database) → trả câu trả lời dự phòng, không gọi LLM. Ngày tính theo UTC. Giới hạn nằm ở database nên không phụ thuộc trình duyệt; đổi số bằng secret `CHAT_LIMIT_*`.
+
 **Thêm sản phẩm (admin).** Sản phẩm mới bắt buộc là DRAFT; trigger tạo dòng `inventories` = 0. Admin nhập thuộc tính (trigger kiểm tra thuộc danh mục, đúng kiểu), vật liệu, ảnh (Storage, chỉ admin tải lên), rồi nhập kho bằng `admin_adjust_stock`. Chuyển ACTIVE chỉ thành công khi đủ thuộc tính bắt buộc và có ít nhất một ảnh.
 
 ## 6. Biến môi trường và secret
@@ -120,6 +126,7 @@ Sản phẩm độc bản đi qua đúng luồng này với tồn = 1: người 
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` | `frontend/.env` | Có |
 | `ALLOWED_ORIGIN` | `supabase secrets set` | Không |
 | `LLM_PROVIDER`, `LLM_API_KEY`, `LLM_MODEL` | `supabase secrets set` | Không |
+| `CHAT_LIMIT_PER_MINUTE`, `CHAT_LIMIT_PER_DAY`, `CHAT_LIMIT_GLOBAL_PER_DAY` | `supabase secrets set` (không bắt buộc, có mặc định) | Không |
 | `PAYMENT_PROVIDER`, `PAYMENT_MERCHANT_ID`, `PAYMENT_SECRET`, `PAYMENT_RETURN_URL` | `supabase secrets set` | Không |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase tự cấp cho Edge Functions | Không, không bao giờ đưa vào frontend |
 
@@ -141,5 +148,5 @@ Client không tự đổi được `role` vì không có quyền cột này.
 | Cổng thanh toán thử nghiệm | Cài đặt `payment-create`, `payment-callback` |
 | Phí giao hàng thật | `store_settings.shipping_fee` (seed đang để 30.000đ làm ví dụ) |
 | Bật xác nhận email khi đăng ký | Cài đặt Auth trên Dashboard; trang đăng ký đã xử lý cả hai trường hợp |
-| Giới hạn số lần gọi chatbot | Hiện chưa có; khách chưa đăng nhập gọi được nên cần chặn lạm dụng trước khi demo công khai |
+| Mức giới hạn chatbot (8 / 60 / 1500) | Đã có cơ chế (migration 0007); chỉ cần chỉnh con số cho phù hợp khi biết giá LLM thật |
 | Bật pg_cron | Không bật thì đơn quá hạn không tự hủy |
