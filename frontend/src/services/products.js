@@ -67,6 +67,14 @@ export async function getBestSellingProducts(limit = 4) {
   return data;
 }
 
+/** Sản phẩm cùng danh mục (trừ chính nó), tối đa `limit` sản phẩm. Dòng trả về cùng dạng với searchProducts. */
+export async function getRelatedProducts(product, limit = 4) {
+  const categoryId = product.categories?.id ?? product.category_id;
+  if (!categoryId) return [];
+  const { items } = await searchProducts({ categoryId, limit: limit + 1 });
+  return items.filter((item) => item.id !== product.id).slice(0, limit);
+}
+
 export async function getProductBySlug(slug) {
   const { data, error } = await supabase
     .from('products')

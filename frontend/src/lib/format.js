@@ -14,6 +14,13 @@ export function formatPrice(value) {
   return Number.isFinite(number) ? priceFormatter.format(number) : '—';
 }
 
+const dateFormatter = new Intl.DateTimeFormat('vi-VN', { dateStyle: 'short' });
+
+export function formatDate(value) {
+  const date = value ? new Date(value) : null;
+  return date && !Number.isNaN(date.getTime()) ? dateFormatter.format(date) : '—';
+}
+
 export function formatDateTime(value) {
   const date = value ? new Date(value) : null;
   return date && !Number.isNaN(date.getTime()) ? dateTimeFormatter.format(date) : '—';
